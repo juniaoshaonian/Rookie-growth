@@ -1,10 +1,17 @@
 package main
 
-import "net/http"
+import (
+	"context"
+	"fmt"
+	"net/http"
+	"time"
+)
 
 type Server interface {
 	Routable
 	Start(address string)error
+	Shutdown(ctx context.Context)error
+
 }
 type sdkHTTPServer struct {
 	Name string
@@ -21,9 +28,9 @@ func (s *sdkHTTPServer)ServeHTTP(W http.ResponseWriter,R *http.Request){
 	c := NewContext(W,R)
 	s.root(c)
 }
-func NewsdkHttpServer(builds ...filterbuilder,name string)Server{
+func NewsdkHttpServer(name string,builds... filterbuilder,)Server{
 	handler := NewHandlerFunc()
-	var root filter
+	var root filter = handler.ServeHTTP
 	for i:=len(builds)-1;i>=0;i--{
 		b := builds[i]
 		root = b(root)
@@ -33,6 +40,11 @@ func NewsdkHttpServer(builds ...filterbuilder,name string)Server{
 		root: root,
 		h: handler,
 	}
-
+}
+func (s *sdkHTTPServer)Shutdown(ctx context.Context)error{
+	fmt.Printf("#{s.Name} shutdown...\n")
+	time.Sleep(time.Second)
+	fmt.Printf("#{s.Name} shutdown!!!\n")
+	return nil
 
 }
