@@ -1,0 +1,25 @@
+syntax = "proto3";
+package model4;
+
+option go_package = "model4/api";
+
+
+service BMIService {
+  rpc BMIInfo (UserInfoRequest) returns (BMIInfoReply) {}
+}
+
+message UserInfoRequest {
+  uint64 uid = 1;
+}
+
+message BMIInfoReply {
+  BMI bmi = 1;
+}
+
+message BMI {
+  string nickname = 1;
+  uint64 height = 2;
+  uint64 weight = 3;
+  uint64 uid = 4;
+  uint64 bmi = 5;
+ }
