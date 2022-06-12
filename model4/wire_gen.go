@@ -16,6 +16,8 @@ import (
 // Injectors from wire.go:
 
 func InitBmiService() *service.BmiService {
+
+
 	db := data.NewDB()
 	bmiRepo := data.NewBmiRepo(db)
 	bmiBiz := biz.NewBmiBiz(bmiRepo)
