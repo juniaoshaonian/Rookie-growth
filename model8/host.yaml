@@ -1,0 +1,5 @@
+host:  "101.35.101.87"
+port:  6379
+auth:  "test123"
+database:  0
+cur: 50
