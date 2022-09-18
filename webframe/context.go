@@ -3,6 +3,9 @@ package webframe
 import "net/http"
 
 type Context struct {
-	req  *http.Request
-	resp http.ResponseWriter
+	Req           *http.Request
+	Resp          http.ResponseWriter
+	RespsonseDate []byte
+	ResponseCode  int
+	MatchRouter   string
 }

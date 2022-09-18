@@ -30,6 +30,7 @@ func newRouter() router {
 }
 
 type node struct {
+	router     string
 	typ        nodeType
 	children   map[string]*node
 	path       string
@@ -76,7 +77,7 @@ func (r *router) addRoute(method string, path string, fn HanleFunc) {
 	if root.handler != nil {
 		panic(fmt.Sprintf("web: 路由冲突[%s]", path))
 	}
-
+	root.router = path
 	root.handler = fn
 
 }
@@ -179,6 +180,7 @@ func (r *router) findRoute(method, path string) (*matchInfo, bool) {
 		}
 	}
 	mi.n = root
+
 	return mi, true
 
 }
