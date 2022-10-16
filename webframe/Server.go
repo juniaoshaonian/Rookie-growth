@@ -13,9 +13,21 @@ type Server interface {
 	addRoute(method string, path string)
 }
 
+type ServeOption func(s *HttpServr)
+
 type HttpServr struct {
 	router
 	mdl []Middleware
+}
+
+func NewHTTPServer(opts ...ServeOption) *HttpServr {
+	s := &HttpServr{
+		router: newRouter(),
+	}
+	for _, opt := range opts {
+		opt(s)
+	}
+	return s
 }
 
 func (h *HttpServr) Start(addr string) error {
@@ -49,5 +61,6 @@ func (h *HttpServr) Serve(ctx *Context) {
 
 	mi.n.handler(ctx)
 	ctx.MatchRouter = mi.n.router
+	ctx.pathParams = mi.pathParams
 
 }
