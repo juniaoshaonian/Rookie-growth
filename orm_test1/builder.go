@@ -64,16 +64,14 @@ func (b *builder) colName(table TableReference, fd string) (string, error) {
 		}
 		return b.colName(tbl.right, fd)
 	case *SubQuery:
-		m, err := b.r.Get(tbl.tbl.entity)
-		if err != nil {
-			return "", err
+		if len(tbl.cols) > 0 {
+			for _, col := range tbl.cols {
+				if col.FieldName() != fd {
+					return "", errs.NewErrField(fd)
+				}
+			}
 		}
-		fdmeta, ok := m.FieldMap[fd]
-		if !ok {
-			return "", errs.NewErrField(fd)
-		}
-		return fdmeta.Colname, nil
-
+		return b.colName(tbl.tbl, fd)
 	default:
 		return "", errors.New("错误的表类型")
 	}

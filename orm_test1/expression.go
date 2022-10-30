@@ -5,6 +5,10 @@ type RowExpr struct {
 	args []any
 }
 
+func (r RowExpr) FieldName() string {
+	return r.expr
+}
+
 func (r RowExpr) selectable() {
 }
 

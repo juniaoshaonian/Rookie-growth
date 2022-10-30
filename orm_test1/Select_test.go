@@ -6,6 +6,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"orm_test1/internal/errs"
 	"orm_test1/internal/valuer"
 	"testing"
 )
@@ -514,12 +515,71 @@ func TestSelector_SubQuery(t *testing.T) {
 			input: func() QueryBuilder {
 				t1 := TableOf(&Order{})
 				sub := NewSelect[OrderDetail](db).AsSub("sub")
-				return NewSelect[Order](db).From(sub.Join(t1).On(t1.C("Id").EQ(sub.C("OrderId")))).Where()
+				return NewSelect[Order](db).From(sub.Join(t1).On(t1.C("Id").EQ(sub.C("OrderId"))))
 			}(),
-			wantQuery: &Query{
-				SQL: "SELECT * FROM ((SELECT * FROM `order_detail`) AS `sub` JOIN `order` ON `id` = `sub`.`order_id`);",
+			wantVal: &Query{
+				Sql: "SELECT * FROM ((SELECT * FROM `order_detail`) AS `sub` JOIN `order` ON `id` = `sub`.`order_id`);",
 			},
-		},,
+		},
+		{
+			name: "join and join",
+			input: func() QueryBuilder {
+				sub1 := NewSelect[OrderDetail](db).AsSub("sub1")
+				sub2 := NewSelect[OrderDetail](db).AsSub("sub2")
+				return NewSelect[Order](db).From(sub1.RightJoin(sub2).Using("Id"))
+			}(),
+			wantVal: &Query{
+				Sql: "SELECT * FROM ((SELECT * FROM `order_detail`) AS `sub1` RIGHT JOIN (SELECT * FROM `order_detail`) AS `sub2` USING (`id`));",
+			},
+		},
+		{
+			name: "join sub sub",
+			input: func() QueryBuilder {
+				sub1 := NewSelect[OrderDetail](db).AsSub("sub1")
+				sub2 := NewSelect[OrderDetail](db).From(sub1).AsSub("sub2")
+				t1 := TableOf(&Order{}).As("o1")
+				return NewSelect[Order](db).From(sub2.Join(t1).Using("Id"))
+			}(),
+			wantVal: &Query{
+				Sql: "SELECT * FROM ((SELECT * FROM (SELECT * FROM `order_detail`) AS `sub1`) AS `sub2` JOIN `order` AS `o1` USING (`id`));",
+			},
+		},
+		{
+			name: "invalid field",
+			input: func() QueryBuilder {
+				t1 := TableOf(&Order{})
+				sub := NewSelect[OrderDetail](db).AsSub("sub")
+				return NewSelect[Order](db).Select(sub.C("Invalid")).From(t1.Join(sub).On(t1.C("Id").EQ(sub.C("OrderId"))))
+			}(),
+			wantErr: errs.NewErrField("Invalid"),
+		},
+		{
+			name: "invalid field in predicates",
+			input: func() QueryBuilder {
+				t1 := TableOf(&Order{})
+				sub := NewSelect[OrderDetail](db).AsSub("sub")
+				return NewSelect[Order](db).Select(sub.C("ItemId")).From(t1.Join(sub).On(t1.C("Id").EQ(sub.C("Invalid"))))
+			}(),
+			wantErr: errs.NewErrField("Invalid"),
+		},
+		{
+			name: "invalid field in aggregate function",
+			input: func() QueryBuilder {
+				t1 := TableOf(&Order{})
+				sub := NewSelect[OrderDetail](db).AsSub("sub")
+				return NewSelect[Order](db).Select(Max("Invalid")).From(t1.Join(sub).On(t1.C("Id").EQ(sub.C("OrderId"))))
+			}(),
+			wantErr: errs.NewErrField("Invalid"),
+		},
+		{
+			name: "not selected",
+			input: func() QueryBuilder {
+				t1 := TableOf(&Order{})
+				sub := NewSelect[OrderDetail](db).Select(C("OrderId")).AsSub("sub")
+				return NewSelect[Order](db).Select(sub.C("ItemId")).From(t1.Join(sub).On(t1.C("Id").EQ(sub.C("OrderId"))))
+			}(),
+			wantErr: errs.NewErrField("ItemId"),
+		},
 	}
 
 	for _, tc := range testcases {

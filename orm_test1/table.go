@@ -121,6 +121,7 @@ type SubQuery struct {
 	sub   QueryBuilder
 	tbl   Table
 	q     *Query
+	cols  []Selectable
 }
 
 func (s *SubQuery) Build() (q *Query, err error) {
@@ -144,10 +145,24 @@ func (s *SubQuery) C(name string) *Column {
 	}
 }
 
-func (s *SubQuery) Join(table TableReference) Join {
-	return Join{
+func (s *SubQuery) Join(table TableReference) *JoinBuilder {
+	return &JoinBuilder{
 		left:  s,
-		typ:   "",
+		typ:   "JOIN",
+		right: table,
+	}
+}
+func (s *SubQuery) RightJoin(table TableReference) *JoinBuilder {
+	return &JoinBuilder{
+		left:  s,
+		typ:   "RIGHT JOIN",
+		right: table,
+	}
+}
+func (s *SubQuery) LeftJoin(table TableReference) *JoinBuilder {
+	return &JoinBuilder{
+		left:  s,
+		typ:   "LEFT JOIN",
 		right: table,
 	}
 }

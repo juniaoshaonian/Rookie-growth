@@ -113,7 +113,10 @@ func (s *Select[T]) BuildExpression(p Expression) error {
 		if ok {
 			s.sb.WriteString(" (")
 		}
-		s.BuildExpression(expr.left)
+		err := s.BuildExpression(expr.left)
+		if err != nil {
+			return err
+		}
 		if ok {
 			s.sb.WriteString(") ")
 		}
@@ -124,7 +127,10 @@ func (s *Select[T]) BuildExpression(p Expression) error {
 		if ok {
 			s.sb.WriteString(" (")
 		}
-		s.BuildExpression(expr.right)
+		err = s.BuildExpression(expr.right)
+		if err != nil {
+			return err
+		}
 		if ok {
 			s.sb.WriteString(") ")
 		}
@@ -175,6 +181,7 @@ func (s *Select[T]) AsSub(alias string) *SubQuery {
 		tbl:   tbl,
 		sub:   s,
 		alias: alias,
+		cols:  s.cols,
 	}
 }
 func (s *Select[T]) buildTable(t TableReference) error {

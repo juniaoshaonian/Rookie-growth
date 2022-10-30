@@ -2,6 +2,7 @@ package orm_test1
 
 type Selectable interface {
 	selectable()
+	FieldName() string
 }
 
 type Aggregate struct {
@@ -9,6 +10,10 @@ type Aggregate struct {
 	fn    string
 	name  string
 	alias string
+}
+
+func (a Aggregate) FieldName() string {
+	return a.name
 }
 
 func (a Aggregate) selectable() {
