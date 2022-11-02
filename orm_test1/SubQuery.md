@@ -31,7 +31,13 @@ join查询左右连接这一个子查询
   SELECT `sub`.`item_id` FROM (`order` JOIN (SELECT * FROM `order_detail`) AS `sub` ON `id` = `sub`.`order_id`)
 
 ```
-- 子查询嵌套子查询
+这里涉及到一个问题。join查询时涉及到的两个表相同字段，怎么指定是哪个的字段呢。让subquery也实现tablereference接口。
+
+
+
+
+
+
 
 5. 作为标量使用（这种使用很少不支持）
 
