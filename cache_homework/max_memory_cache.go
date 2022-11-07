@@ -41,13 +41,11 @@ func (l *MaxMemoryCache) DeleteNode(node *DataNode) {
 func (l *MaxMemoryCache) Set(ctx context.Context, key string, val []byte, expiration time.Duration) error {
 	data, ok := l.datas[key]
 	if ok {
-
 		l.Delete(context.Background(), key)
 		data.val = val
 		l.PutBehindHead(data)
 		l.datas[key] = data
 		l.used = l.used + int64(len(key)) + int64(len(val)) + int64(16)
-
 	} else {
 		new_node := &DataNode{
 			key: key,

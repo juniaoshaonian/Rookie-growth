@@ -53,7 +53,7 @@ func TestMaxMemoryCache_Set(t *testing.T) {
 		}
 		assert.Equal(t, tc.val, val)
 	}
-	// 测试修改队列已存在的值使缓存满淘汰最老的键
+	// 测试修改队列已存在的值使缓存满淘汰最老的键,将key4的值改大会将剩下的key3也给淘汰出去
 	testcases[3].val = []byte("value4value4value4value4value4value4value4value4value4value4value4value4")
 	mcache.Set(context.Background(), "key4", []byte("value4value4value4value4value4value4value4value4value4value4value4value4"), 1)
 	for _, tc := range testcases {
