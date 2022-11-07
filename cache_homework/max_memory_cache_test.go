@@ -53,7 +53,17 @@ func TestMaxMemoryCache_Set(t *testing.T) {
 		}
 		assert.Equal(t, tc.val, val)
 	}
-
+	// 测试修改队列已存在的值使缓存满淘汰最老的键
+	testcases[3].val = []byte("value4value4value4value4value4value4value4value4value4value4value4value4")
+	mcache.Set(context.Background(), "key4", []byte("value4value4value4value4value4value4value4value4value4value4value4value4"), 1)
+	for _, tc := range testcases {
+		val, err := mcache.Get(context.Background(), tc.key)
+		if tc.key == "key1" || tc.key == "key2" || tc.key == "key3" {
+			assert.Equal(t, errors.New(fmt.Sprintf("cache can not found key:%s", tc.key)), err)
+			continue
+		}
+		assert.Equal(t, tc.val, val)
+	}
 }
 
 type node struct {
