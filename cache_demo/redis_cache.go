@@ -2,6 +2,7 @@ package cache_demo
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"github.com/go-redis/redis/v9"
 	"time"
@@ -13,6 +14,7 @@ type RedisCache struct {
 }
 
 func (r *RedisCache) Get(ctx context.Context, key string) (any, error) {
+	sql.DB{}.Query()
 	return r.client.Get(ctx, key).Result()
 
 }
